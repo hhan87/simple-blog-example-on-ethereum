@@ -1,0 +1,80 @@
+.body {
+  margin: 10px;
+}
+.header {
+  display: flex;
+  color: #00752e;
+  font-size: 2em;
+  font-weight: bold;
+  align-content: center;
+  margin-bottom: 1em;
+}
+
+.post-article-box {
+}
+.post-article-title input {
+  padding: 0.2em;
+  width: 100%;
+  font-size: 1.5em;
+  margin-bottom: 0.5em;
+}
+.input-article-title {
+}
+.post-article-body {
+  margin-bottom: 0.5em;
+}
+
+.input-article-textarea {
+  border: solid 1px silver;
+  height: 150px;
+  padding: 0.3em;
+  font-size: 1em;
+  overflow: auto;
+}
+
+.post-article-button {
+  display: flex;
+  justify-content: center;
+}
+.post-article-button input {
+  font-size: xx-large;
+  background: cadetblue;
+  color: white;
+}
+.articles {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.article {
+  padding: 0.5em 1em;
+  border: black solid 1px;
+  border-radius: 5px;
+  margin-bottom: 1em;
+}
+
+.article-title {
+  font-weight: bold;
+  font-size: 1.5em;
+}
+.article-info {
+  margin-left: 1em;
+}
+.article-body {
+}
+.article-replies {
+}
+.reply-title {
+  padding: 10px 0px;
+  font-size: 0.7em;
+}
+.reply {
+  padding-left: 2em;
+}
+.reply-body {
+  padding-top: 0.5em;
+  border-top: black dashed 1px;
+}
+.reply-info {
+  padding-left: 2em;
+  text-align: right;
+}

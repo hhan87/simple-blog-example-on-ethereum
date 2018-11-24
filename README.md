@@ -1,0 +1,1 @@
+## CoreDigger's Simple Blog Example on Ethereum 

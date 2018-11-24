@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>Hello, ethereum!</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="src/main.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="header">
+        <span class="title">Simple Blog on Blockchain</span>
+      </div>
+      <div class="post-article-box">
+        <div class="post-article-title">
+          <input
+            class="input-article-title"
+            id="input-title"
+            type="text"
+            placeholder="Title"
+          />
+        </div>
+        <div class="post-article-body">
+          <div
+            contenteditable="true"
+            class="input-article-textarea"
+            id="input-body"
+          ></div>
+        </div>
+        <div class="post-article-button">
+          <input type="button" id="postToEthereum" value="Summit" />
+        </div>
+      </div>
+      <div class="articles"></div>
+    </div>
+
+    <script src="src/index.js"></script>
+  </body>
+</html>
