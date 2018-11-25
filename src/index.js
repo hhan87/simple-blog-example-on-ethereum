@@ -1,40 +1,27 @@
 import "@babel/polyfill";
 import Web3 from "web3";
-//let Web3 = require("web3");
-let web3 = new Web3("http://127.0.0.1:8545");
-window.web3 = web3;
+
+let web3js = new Web3(web3.currentProvider);
+const getQueryParams = () => {
+  let queryStr = window.location.search.substring(1);
+  let result = {};
+  if (queryStr != "") {
+    let queryArray = queryStr.split("&").map(x => x.split("="));
+    result = queryArray.reduce((acc, pair) => {
+      acc[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+      return acc;
+    }, result);
+  }
+  return result;
+};
+let query = getQueryParams();
+const blogOwner = query.id || "0x5Cbfe2993a28b59a17f03887585c77Ade5Ad6D83";
+const contractAddress = "0xebe937c0218dd840fa8b884c01b0b8b9a2fcccf6";
+window.web3 = web3js;
 
 window.addEventListener("DOMContentLoaded", async () => {
-  console.log("DOMContentLoaded");
-
   let coreDiggerContract = new web3.eth.Contract(
     [
-      {
-        constant: false,
-        inputs: [
-          {
-            name: "_title",
-            type: "string"
-          },
-          {
-            name: "_body",
-            type: "string"
-          },
-          {
-            name: "_owner",
-            type: "address"
-          },
-          {
-            name: "_timestamp",
-            type: "uint256"
-          }
-        ],
-        name: "makeNewArticle",
-        outputs: [],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function"
-      },
       {
         constant: false,
         inputs: [
@@ -44,10 +31,6 @@ window.addEventListener("DOMContentLoaded", async () => {
           },
           {
             name: "_ownerOfArticle",
-            type: "address"
-          },
-          {
-            name: "_ownerOfReply",
             type: "address"
           },
           {
@@ -66,10 +49,23 @@ window.addEventListener("DOMContentLoaded", async () => {
         type: "function"
       },
       {
-        inputs: [],
+        constant: true,
+        inputs: [
+          {
+            name: "_owner",
+            type: "address"
+          }
+        ],
+        name: "getArticlesNumOfOwner",
+        outputs: [
+          {
+            name: "",
+            type: "uint256"
+          }
+        ],
         payable: false,
-        stateMutability: "nonpayable",
-        type: "constructor"
+        stateMutability: "view",
+        type: "function"
       },
       {
         constant: true,
@@ -111,22 +107,29 @@ window.addEventListener("DOMContentLoaded", async () => {
         type: "function"
       },
       {
-        constant: true,
+        constant: false,
         inputs: [
+          {
+            name: "_title",
+            type: "string"
+          },
+          {
+            name: "_body",
+            type: "string"
+          },
           {
             name: "_owner",
             type: "address"
-          }
-        ],
-        name: "getArticlesNumOfOwner",
-        outputs: [
+          },
           {
-            name: "",
+            name: "_timestamp",
             type: "uint256"
           }
         ],
+        name: "makeNewArticle",
+        outputs: [],
         payable: false,
-        stateMutability: "view",
+        stateMutability: "nonpayable",
         type: "function"
       },
       {
@@ -163,106 +166,149 @@ window.addEventListener("DOMContentLoaded", async () => {
         payable: false,
         stateMutability: "view",
         type: "function"
+      },
+      {
+        inputs: [],
+        payable: false,
+        stateMutability: "nonpayable",
+        type: "constructor"
       }
     ],
-    "0xb18fedfa235d1eafca8bb2a271e09285c1f7c767"
+    contractAddress
   );
-
-  const addArticle = (article, replies) => {
-    let date = new Date(parseInt(article.timestamp, 10));
-    console.log(date);
-
-    let reply = replies.map(reply => {
-      let dateReply = new Date(parseInt(reply.timestamp, 10));
-      return !reply
-        ? ""
-        : `
+  const getReplyHTML = reply => {
+    let dateReply = new Date(parseInt(reply.timestamp, 10));
+    return `
                 <div class="reply">
                   <div class="reply-body">${reply.replyBody}</div>
                   <div class="reply-info">${
                     reply.ownerOfReply
-                  } by ${dateReply.getFullYear() +
-            "-" +
-            (dateReply.getMonth() + 1) +
-            "-" +
-            dateReply.getDate()}</div>
+                  } at ${dateReply.getFullYear() +
+      "-" +
+      (dateReply.getMonth() + 1) +
+      "-" +
+      dateReply.getDate() +
+      " " +
+      dateReply.getHours() +
+      ":" +
+      dateReply.getMinutes()}</div>
                 </div>
             `;
+  };
+  const addArticle = (index, article, replies) => {
+    let date = new Date(parseInt(article.timestamp, 10));
+    //console.log(date);
+    let reply = replies.map(reply => {
+      return !reply ? "" : getReplyHTML(reply);
     });
 
-    document.querySelector(".articles").innerHTML +=
+    document.querySelector(".articles").innerHTML =
       `
         <div class="article">
           <div class="article-title">${article.title}</div>
           <div class="article-info">posted by ${
             article.ownerAddress
-          }, ${date.getFullYear() +
+          } at ${date.getFullYear() +
         "-" +
         (date.getMonth() + 1) +
         "-" +
-        date.getDate()}</div>
+        date.getDate() +
+        " " +
+        date.getHours() +
+        ":" +
+        date.getMinutes()}</div>
           <div class="article-body">
             <p>${article.body}</p>
           </div>
           <div class="article-replies">
             <div class="reply-title">답글</div>
+              <div class="reply-input">
+                <div class="post-reply-body">
+                <div
+                  contenteditable="true"
+                  class="input-reply-textarea"
+                  id="input-reply-${index}"
+                ></div>
+                <div class="reply-button">
+                  <input type="button" id="replyToArticle" data-index="${index}" value="Reply" />
+                </div>
+      
+              </div>
+            </div>
             ` +
       reply.join("") +
       `
           </div>
         </div>
-        `;
+        ` +
+      document.querySelector(".articles").innerHTML;
   };
-
-  let temp = `
-        <div class="article">
-          <div class="article-title">HELLO, ETHEREUM!</div>
-          <div class="article-info">posted by core-digger, 2018-11-25</div>
-          <div class="article-body">
-            <p>안녕하세요? 한현섭입니다.반갑습니다.</p>
-          </div>
-          <div class="article-replies">
-            <div class="reply-title">답글</div>
-             <div class="reply">
-               <div class="reply-body">잘 동작하는 군여.</div>
-               <div class="reply-info">0x12345 by 2018-11-25</div>
-             </div>
-          </div>
-        </div>
-        `;
-  document.querySelector(".articles").innerHTML = temp;
-
-  let coinbase = await web3.eth.getCoinbase();
-  let articleLen = await coreDiggerContract.methods
-    .getArticlesNumOfOwner(coinbase)
-    .call();
-  for (let i = articleLen - 1; i >= 0; i--) {
+  const getArticle = async index => {
     let result = await coreDiggerContract.methods
-      .getArticle(coinbase, i)
+      .getArticle(blogOwner, index)
       .call();
     let replyArr = [];
     console.log(result);
     for (let j = 0; j < parseInt(result.replyCount); j++) {
       replyArr.push(
-        await coreDiggerContract.methods.getReply(i, coinbase, j).call()
+        await coreDiggerContract.methods.getReply(index, blogOwner, j).call()
       );
     }
     console.log(replyArr);
-    addArticle(result, replyArr);
-  }
-
+    addArticle(index, result, replyArr);
+  };
+  const loadArticles = async () => {
+    let articleLen = await coreDiggerContract.methods
+      .getArticlesNumOfOwner(blogOwner)
+      .call();
+    for (let i = 0; i < articleLen; i++) {
+      await getArticle(i);
+    }
+  };
+  loadArticles();
   document
     .querySelector("#postToEthereum")
     .addEventListener("click", async e => {
-      web3.eth.coinbase;
+      let coinbase = await web3.eth.getCoinbase();
       let title = document.querySelector("#input-title").value;
       let body = document.querySelector("#input-body").innerHTML;
       let result = await coreDiggerContract.methods
-        .makeNewArticle(title, body, coinbase, Date.now())
-        .send({ from: coinbase, gas: 500000 });
-      //let lastIndex = await coreDiggerContract.methods.getArticlesNumOfOwner(coinbase).call();
-      //let last = await coreDiggerContract.methods.getArticle(coinbase, lastIndex - 1).call();
-      console.log(last);
-      //addArticle(last)
+        .makeNewArticle(title, body, blogOwner, Date.now())
+        .send({ from: coinbase, gas: 2000000 });
+      let numOfArticle = await coreDiggerContract.methods
+        .getArticlesNumOfOwner(coinbase)
+        .call();
+      getArticle(numOfArticle - 1);
     });
+  document.querySelector(".articles").addEventListener("click", async e => {
+    let coinbase = await web3.eth.getCoinbase();
+    if (e.target.id === "replyToArticle") {
+      let index = e.target.attributes["data-index"].value;
+      let reply = document.querySelector("#input-reply-" + index).innerHTML;
+      if (reply != "") {
+        let result = await coreDiggerContract.methods
+          .replyToArticle(
+            index,
+            blogOwner,
+            document.querySelector("#input-reply-" + index).innerHTML,
+            Date.now()
+          )
+          .send({ from: coinbase, gas: 500000 });
+        console.log(result);
+        let article = await coreDiggerContract.methods
+          .getArticle(blogOwner, index)
+          .call();
+        console.log(article);
+        let reply = await coreDiggerContract.methods
+          .getReply(index, blogOwner, article.replyCount - 1)
+          .call();
+        console.log(reply);
+        e.target.parentElement.parentElement.parentElement.parentElement.innerHTML += getReplyHTML(
+          reply
+        );
+      } else {
+        alert("답글 내용을 입력해주세요!");
+      }
+    }
+  });
 });

@@ -1,10 +1,10 @@
-.body {
-  margin: 10px;
+body {
+  margin: 50px;
 }
 .header {
   display: flex;
   color: #00752e;
-  font-size: 2em;
+  font-size: 3em;
   font-weight: bold;
   align-content: center;
   margin-bottom: 1em;
@@ -41,6 +41,17 @@
   background: cadetblue;
   color: white;
 }
+
+.reply-button {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1em 0em;
+}
+#replyToArticle {
+  font-size: large;
+  background: cadetblue;
+  color: white;
+}
 .articles {
   margin-top: 1em;
   margin-bottom: 1em;
@@ -58,10 +69,18 @@
 }
 .article-info {
   margin-left: 1em;
+  overflow-wrap: break-word;
 }
 .article-body {
 }
 .article-replies {
+}
+.input-reply-textarea {
+  border: solid 1px silver;
+  height: 100px;
+  padding: 0.3em;
+  font-size: 1em;
+  overflow: auto;
 }
 .reply-title {
   padding: 10px 0px;
@@ -77,4 +96,5 @@
 .reply-info {
   padding-left: 2em;
   text-align: right;
+  overflow-wrap: break-word;
 }
