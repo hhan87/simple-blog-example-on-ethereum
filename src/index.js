@@ -17,10 +17,9 @@ const getQueryParams = () => {
 let query = getQueryParams();
 const blogOwner = query.id || "0x5Cbfe2993a28b59a17f03887585c77Ade5Ad6D83";
 const contractAddress = "0xebe937c0218dd840fa8b884c01b0b8b9a2fcccf6";
-window.web3 = web3js;
 
 window.addEventListener("DOMContentLoaded", async () => {
-  let coreDiggerContract = new web3.eth.Contract(
+  let coreDiggerContract = new web3js.eth.Contract(
     [
       {
         constant: false,
@@ -265,50 +264,62 @@ window.addEventListener("DOMContentLoaded", async () => {
       await getArticle(i);
     }
   };
-  loadArticles();
+  try {
+    loadArticles();
+  } catch (e) {
+    console.error(e);
+  }
   document
     .querySelector("#postToEthereum")
     .addEventListener("click", async e => {
-      let coinbase = await web3.eth.getCoinbase();
-      let title = document.querySelector("#input-title").value;
-      let body = document.querySelector("#input-body").innerHTML;
-      let result = await coreDiggerContract.methods
-        .makeNewArticle(title, body, blogOwner, Date.now())
-        .send({ from: coinbase, gas: 2000000 });
-      let numOfArticle = await coreDiggerContract.methods
-        .getArticlesNumOfOwner(coinbase)
-        .call();
-      getArticle(numOfArticle - 1);
+      try {
+        let coinbase = await web3js.eth.getCoinbase();
+        let title = document.querySelector("#input-title").value;
+        let body = document.querySelector("#input-body").innerHTML;
+        let result = await coreDiggerContract.methods
+          .makeNewArticle(title, body, blogOwner, Date.now())
+          .send({ from: coinbase, gas: 2000000 });
+        let numOfArticle = await coreDiggerContract.methods
+          .getArticlesNumOfOwner(coinbase)
+          .call();
+        getArticle(numOfArticle - 1);
+      } catch (e) {
+        console.error(e);
+      }
     });
   document.querySelector(".articles").addEventListener("click", async e => {
-    let coinbase = await web3.eth.getCoinbase();
-    if (e.target.id === "replyToArticle") {
-      let index = e.target.attributes["data-index"].value;
-      let reply = document.querySelector("#input-reply-" + index).innerHTML;
-      if (reply != "") {
-        let result = await coreDiggerContract.methods
-          .replyToArticle(
-            index,
-            blogOwner,
-            document.querySelector("#input-reply-" + index).innerHTML,
-            Date.now()
-          )
-          .send({ from: coinbase, gas: 500000 });
-        console.log(result);
-        let article = await coreDiggerContract.methods
-          .getArticle(blogOwner, index)
-          .call();
-        console.log(article);
-        let reply = await coreDiggerContract.methods
-          .getReply(index, blogOwner, article.replyCount - 1)
-          .call();
-        console.log(reply);
-        e.target.parentElement.parentElement.parentElement.parentElement.innerHTML += getReplyHTML(
-          reply
-        );
-      } else {
-        alert("답글 내용을 입력해주세요!");
+    try {
+      let coinbase = await web3js.eth.getCoinbase();
+      if (e.target.id === "replyToArticle") {
+        let index = e.target.attributes["data-index"].value;
+        let reply = document.querySelector("#input-reply-" + index).innerHTML;
+        if (reply != "") {
+          let result = await coreDiggerContract.methods
+            .replyToArticle(
+              index,
+              blogOwner,
+              document.querySelector("#input-reply-" + index).innerHTML,
+              Date.now()
+            )
+            .send({ from: coinbase, gas: 500000 });
+          console.log(result);
+          let article = await coreDiggerContract.methods
+            .getArticle(blogOwner, index)
+            .call();
+          console.log(article);
+          let reply = await coreDiggerContract.methods
+            .getReply(index, blogOwner, article.replyCount - 1)
+            .call();
+          console.log(reply);
+          e.target.parentElement.parentElement.parentElement.parentElement.innerHTML += getReplyHTML(
+            reply
+          );
+        } else {
+          alert("답글 내용을 입력해주세요!");
+        }
       }
+    } catch (e) {
+      console.error(e);
     }
   });
 });
